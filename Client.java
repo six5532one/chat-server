@@ -41,28 +41,24 @@ try {
     public static void main(String[] args)  {
         String host = args[0];
         int port = Integer.parseInt(args[1]);
-        new Client(host, port);
-        /*
+        Client client = new Client(host, port);
         while (true) {
-           String next = sc.nextLine();
-           processMessage(next);
+           String next = client.sc.nextLine();
+           client.processMessage(next);
        }
-       */
     }
 
    // Background thread runs this: show messages from other window
    public void run() {
-/*
 try {
        // Receive messages one-by-one, forever
        while (true) {
          // Get the next message
          String message = din.readUTF();
-         // Print to TTY in red
+         // Print messages from the server in red
          System.out.println(ANSI_RED + message + ANSI_RESET);
        }
      } catch( IOException ie ) { System.out.println( ie ); }
-     */
-     System.out.println("I'm the other thread!");
+     //System.out.println("I'm the other thread!");
    }
 }

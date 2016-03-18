@@ -5,7 +5,9 @@
  public class Server
  {
    // The ServerSocket we'll use for accepting new connections
+   private static final String credentialFilePath = "/Users/emchen/Dropbox/columbia/computer_networks/programming/chatserver_cli/user_pass.txt";
    private ServerSocket ss;
+   private HashMap<String, String> credentials;
    // A mapping from sockets to DataOutputStreams.  This will
    // help us avoid having to create a DataOutputStream each time
    // we want to write to a stream.
@@ -13,6 +15,17 @@
    // Constructor and while-accept loop all in one.
    
    public Server( int port ) throws IOException {
+     File credentialsFile = new File(credentialFilePath);
+     try {
+        BufferedReader br = new BufferedReader(new FileReader(credentialsFile)); 
+         String line;
+         while ((line = br.readLine()) != null) {
+             System.out.println(line);
+             }
+     }
+     catch (Exception e)    {
+         System.err.println(e.getMessage());
+     }
      // All we have to do is listen
      listen( port );
    }

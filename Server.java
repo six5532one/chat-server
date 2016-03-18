@@ -27,7 +27,7 @@ private void listen( int port ) throws IOException {
        // Grab the next incoming connection
        Socket s = ss.accept();
        // Tell the world we've got it
-       System.out.println( "Connection from "+s );
+       System.out.println( "Connection from "+s.getInetAddress() );
        // Create a DataOutputStream for writing data to the
        // other side
        DataOutputStream dout = new DataOutputStream( s.getOutputStream() );

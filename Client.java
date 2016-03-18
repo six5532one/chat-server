@@ -21,8 +21,6 @@
        sc = new Scanner(System.in);
        // Initiate the connection
        socket = new Socket( host, port );
-       // We got a connection!  Tell the world
-       System.out.println( "connected to " + socket.getInetAddress() );
        // Let's grab the streams and create DataInput/Output streams
        // from them
        din = new DataInputStream( socket.getInputStream() );

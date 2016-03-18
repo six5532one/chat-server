@@ -12,15 +12,17 @@
    // from the socket
    private DataOutputStream dout;
    private DataInputStream din;
-   Scanner sc=new Scanner(System.in);
+   private Scanner sc;
+
    // Constructor
    public Client( String host, int port ) {
      // Connect to the server
      try {
+       sc = new Scanner(System.in);
        // Initiate the connection
        socket = new Socket( host, port );
        // We got a connection!  Tell the world
-       System.out.println( "connected to "+socket );
+       System.out.println( "connected to " + socket.getInetAddress() );
        // Let's grab the streams and create DataInput/Output streams
        // from them
        din = new DataInputStream( socket.getInputStream() );
@@ -32,11 +34,11 @@
    
    // Gets called when the user types something
    private void processMessage( String message ) {
-try {
+    try {
        // Send it to the server
        dout.writeUTF( message );
-     } catch( IOException ie ) { System.out.println( ie ); }
-}
+        } catch( IOException ie ) { System.out.println( ie ); }
+    }
 
     public static void main(String[] args)  {
         String host = args[0];
@@ -48,9 +50,9 @@ try {
        }
     }
 
-   // Background thread runs this: show messages from other window
+   // Display messages from server
    public void run() {
-try {
+    try {
        // Receive messages one-by-one, forever
        while (true) {
          // Get the next message
@@ -59,6 +61,5 @@ try {
          System.out.println(ANSI_RED + message + ANSI_RESET);
        }
      } catch( IOException ie ) { System.out.println( ie ); }
-     //System.out.println("I'm the other thread!");
    }
 }

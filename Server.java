@@ -7,21 +7,23 @@
    // The ServerSocket we'll use for accepting new connections
    private static final String credentialFilePath = "/Users/emchen/Dropbox/columbia/computer_networks/programming/chatserver_cli/user_pass.txt";
    private ServerSocket ss;
-   private HashMap<String, String> credentials;
+   private Map<String, String> credentials;
    // A mapping from sockets to DataOutputStreams.  This will
    // help us avoid having to create a DataOutputStream each time
    // we want to write to a stream.
    private Hashtable outputStreams = new Hashtable();
-   // Constructor and while-accept loop all in one.
-   
+
+   // Constructor and while-accept loop all in one.   
    public Server( int port ) throws IOException {
      File credentialsFile = new File(credentialFilePath);
+     credentials = new HashMap<String, String>();
      try {
         BufferedReader br = new BufferedReader(new FileReader(credentialsFile)); 
          String line;
          while ((line = br.readLine()) != null) {
-             System.out.println(line);
-             }
+             String[] data = line.trim().split(" ");
+             credentials.put(data[0], data[1]);
+         }
      }
      catch (Exception e)    {
          System.err.println(e.getMessage());
@@ -39,17 +41,29 @@ private void listen( int port ) throws IOException {
      while (true) {
        // Grab the next incoming connection
        Socket s = ss.accept();
-       // Tell the world we've got it
-       System.out.println( "Connection from "+s.getInetAddress() );
-       // Create a DataOutputStream for writing data to the
-       // other side
-       DataOutputStream dout = new DataOutputStream( s.getOutputStream() );
-       // Save this stream so we don't need to make it again
-       outputStreams.put( s, dout );
-       // Create a new thread for this connection, and then forget
-       // about it
-       new ServerThread( this, s );
+       String nameOfLoggedInUser;
+       if ((nameOfLoggedInUser = authenticated(s)) != null)   {
+           System.out.println(nameOfLoggedInUser);
+           /*
+           // Tell the world we've got it
+           System.out.println( "Connection from "+s.getInetAddress() );
+           // Create a DataOutputStream for writing data to the
+           // other side
+           DataOutputStream dout = new DataOutputStream( s.getOutputStream() );
+           // Save this stream so we don't need to make it again
+           outputStreams.put( s, dout );
+           // Create a new thread for this connection, and then forget
+           // about it
+           new ServerThread( this, s );
+           */
+       }
+       else {System.out.println("auth failed");}
      }
+}
+
+private String authenticated(Socket s)  {
+    System.out.println("hello?");
+    return new String("Karen");
 }
 
 // Get an enumeration of all the OutputStreams, one for each client

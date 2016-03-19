@@ -8,6 +8,7 @@
    private static final String credentialFilePath = "/Users/emchen/Dropbox/columbia/computer_networks/programming/chatserver_cli/user_pass.txt";
    private ServerSocket ss;
    private Map<String, String> credentials;
+   private Map<String, HashMap<InetAddress, Integer>> blockedIPs;
    // A mapping from sockets to DataOutputStreams.  This will
    // help us avoid having to create a DataOutputStream each time
    // we want to write to a stream.
@@ -28,6 +29,7 @@
      catch (Exception e)    {
          System.err.println(e.getMessage());
      }
+     blockedIPs = new HashMap<String, HashMap<InetAddress, Integer>>();
      // All we have to do is listen
      listen( port );
    }
@@ -61,9 +63,34 @@ private void listen( int port ) throws IOException {
      }
 }
 
-private String authenticated(Socket s)  {
-    System.out.println("hello?");
-    return new String("Karen");
+private String authenticated(Socket s)  { 
+    String username = null;
+    String password = null;
+    try {
+        DataOutputStream dout = new DataOutputStream( s.getOutputStream() );
+        DataInputStream din = new DataInputStream( s.getInputStream() );
+        while (username == null)    {
+            dout.writeUTF( "Username: " );
+            String[] tokens = din.readUTF().trim().split(" ");
+            if (tokens.length > 1)  {
+                dout.writeUTF("Username may not contain whitespace.");
+            }
+            else if (tokens.length == 1) {
+                username = tokens[0];
+            }
+        }
+        while (password == null)    {
+            dout.writeUTF( "Password: " );
+            String[] tokens = din.readUTF().trim().split(" ");
+            if (tokens.length > 1)  {
+                dout.writeUTF("Password may not contain whitespace.");
+            }
+            else if (tokens.length == 1) {
+                password = tokens[0];
+            }
+        }
+    } catch( IOException ie ) { System.out.println( ie ); }
+    return username;
 }
 
 // Get an enumeration of all the OutputStreams, one for each client

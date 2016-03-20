@@ -55,6 +55,20 @@ private boolean exceededBlockTime(Long currentTimestamp, Long blockTimestamp) {
     return (currentTimestamp - blockTimestamp > BLOCK_TIME);
 }
 
+// make this method synchronized because it checks if a user is connected
+private synchronized boolean duplicateLogin(String username)    {
+    return (outputStreams.get(username) != null);
+}
+
+private synchronized void addConnection(Socket s, String username, Long timestamp, DataOutputStream dout)   {
+    connectedUsers.put(s, username);
+    outputStreams.put( username, dout );
+    lastActive.put(s, timestamp);
+    try  {
+        dout.writeUTF("Login successful!");
+    } catch( IOException ie ) {ie.printStackTrace();}
+}
+
 private void listen( int port ) throws IOException {
      // Create the ServerSocket
      ss = new ServerSocket( port );
@@ -86,7 +100,7 @@ private void listen( int port ) throws IOException {
             }
         } catch( IOException ie ) {ie.printStackTrace();}
        // check for duplicate user login
-        if (dout != null && outputStreams.get(username) != null)   {
+        if (dout != null && duplicateLogin(username))   {
             // send error msg
             try  {
                 dout.writeUTF("duplicate connection, can't log you in. closing connection.");
@@ -116,13 +130,7 @@ private void listen( int port ) throws IOException {
                 }
             }
            if (authenticated(s, username))   {
-               connectedUsers.put(s, username);
-                outputStreams.put( username, dout );
-                lastActive.put(s, currentTimestamp);
-                // send welcome msg
-                try  {
-                    dout.writeUTF("Login successful!");
-                } catch( IOException ie ) {ie.printStackTrace();}
+               addConnection(s, username, currentTimestamp, dout);
                 new ServerThread( this, s );
            }
            else {

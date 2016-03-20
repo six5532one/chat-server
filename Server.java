@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
    private Map<String, DataOutputStream> outputStreams;
    private Map<Socket, String> connectedUsers;
    private Map<Socket, Long> lastActive;
+    private Map<String, Long> lastLogoutTime;
 
    // Constructor and while-accept loop all in one.   
    public Server( int port ) throws IOException {
@@ -45,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
      connectedUsers = new ConcurrentHashMap<Socket, String>();
      outputStreams = new ConcurrentHashMap<String, DataOutputStream>();
      lastActive = new ConcurrentHashMap<Socket, Long>();
+     lastLogoutTime = new ConcurrentHashMap<String, Long>();
      // All we have to do is listen
      listen( port );
    }
@@ -210,12 +212,13 @@ void sendToAll( String message ) {
 }
 */
 
+void sendToAll( String message ) {System.out.println("send to all");}
+
  // Remove a socket, and it's corresponding output stream, from our
  // list.  This is usually called by a connection thread that has
  // discovered that the connectin to the client is dead.
- void removeConnection( Socket s ) {
-   // Synchronize so we don't mess up sendToAll() while it walks
-   // down the list of all output streamsa
+synchronized void removeConnection( Socket s ) {
+     /*
    synchronized( outputStreams ) {
      // Tell the world
      System.out.println( "Removing connection to "+s );
@@ -229,6 +232,12 @@ void sendToAll( String message ) {
        ie.printStackTrace();
      }
   } //synchronized
+  */
+     Long currentTimestamp = new Long(System.currentTimeMillis() / 1000L);
+     String username = connectedUsers.remove(s);
+    outputStreams.remove(username);
+    lastActive.remove(s);
+    lastLogoutTime.put(username, currentTimestamp);
 }
 
 // Main routine

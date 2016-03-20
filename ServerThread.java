@@ -34,9 +34,11 @@
          server.sendToAll( message );
        }
      } catch( EOFException ie ) {
+       System.out.println("EOFException");
        // This doesn't need an error message
      } catch( IOException ie ) {
        // This does; tell the world!
+         System.out.println("IOException");
        ie.printStackTrace();
      } finally {
        // The connection is closed for one reason or another,

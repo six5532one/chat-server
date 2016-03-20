@@ -10,18 +10,24 @@ import java.util.concurrent.ConcurrentHashMap;
  {
    // The ServerSocket we'll use for accepting new connections
    //private static final String credentialFilePath = "/Users/emchen/Dropbox/columbia/computer_networks/programming/chatserver_cli/user_pass.txt";
+   private final Long BLOCK_TIME;
    private static final String credentialFilePath = "/home/ec2805/computer_networks/chatserver_cli/user_pass.txt";
    private ServerSocket ss;
    private Map<String, String> credentials;
-   private Map<String, HashMap<InetAddress, Integer>> blockedIPs;
+   private Map<String, HashMap<InetAddress, Long>> blockedIPs;
    // A mapping from sockets to DataOutputStreams.  This will
    // help us avoid having to create a DataOutputStream each time
    // we want to write to a stream.
-   private Hashtable outputStreams = new Hashtable();
+   private Map<String, DataOutputStream> outputStreams;
    private Map<Socket, String> connectedUsers;
+   private Map<Socket, Long> lastActive;
 
    // Constructor and while-accept loop all in one.   
    public Server( int port ) throws IOException {
+       try  {
+           BLOCK_TIME = Long.parseLong(System.getenv().get("BLOCK_TIME"));
+       } catch (NumberFormatException e) {throw new RuntimeException("BLOCK_TIME environment variable is not set");}
+
      File credentialsFile = new File(credentialFilePath);
      credentials = new HashMap<String, String>();
      try {
@@ -35,12 +41,18 @@ import java.util.concurrent.ConcurrentHashMap;
      catch (Exception e)    {
          System.err.println(e.getMessage());
      }
-     blockedIPs = new HashMap<String, HashMap<InetAddress, Integer>>();
+        blockedIPs = new HashMap<String, HashMap<InetAddress, Long>>();
      connectedUsers = new ConcurrentHashMap<Socket, String>();
+     outputStreams = new ConcurrentHashMap<String, DataOutputStream>();
+     lastActive = new ConcurrentHashMap<Socket, Long>();
      // All we have to do is listen
      listen( port );
    }
    
+private boolean exceededBlockTime(Long currentTimestamp, Long blockTimestamp) {
+    return (currentTimestamp - blockTimestamp > BLOCK_TIME);
+}
+
 private void listen( int port ) throws IOException {
      // Create the ServerSocket
      ss = new ServerSocket( port );
@@ -81,30 +93,50 @@ private void listen( int port ) throws IOException {
        }
        // check credentials
        else {
+           // check if this connection request comes from a blocked IP for that user
+           HashMap<InetAddress, Long> IPblockTimes = blockedIPs.get(username);
+            InetAddress currentIP = s.getInetAddress();
+            Long currentTimestamp = new Long(System.currentTimeMillis() / 1000L);
+           Long blockTimestamp = null;
+
+            if (IPblockTimes != null && (blockTimestamp = IPblockTimes.get(currentIP)) != null) {
+                if (exceededBlockTime(currentTimestamp, blockTimestamp))    {
+                    IPblockTimes.remove(currentIP);
+                    blockedIPs.put(username, IPblockTimes);
+                    System.out.println(blockedIPs.get(username).get(currentIP));
+                }
+                else    {
+                    // this IP is still blocked for that user
+                    try  {
+                        dout.writeUTF("This IP is blocked for this user.");
+                    } catch( IOException ie ) {ie.printStackTrace();}
+                    s.close();
+                }
+            }
            if (authenticated(s, username))   {
                connectedUsers.put(s, username);
                 outputStreams.put( username, dout );
+                lastActive.put(s, currentTimestamp);
                 // send welcome msg
                 try  {
                     dout.writeUTF("Login successful!");
                 } catch( IOException ie ) {ie.printStackTrace();}
-  
-               
-               /*
-               // Tell the world we've got it
-               // Create a DataOutputStream for writing data to the
-               // other side
-               DataOutputStream dout = new DataOutputStream( s.getOutputStream() );
-               // Save this stream so we don't need to make it again
-               
-               // Create a new thread for this connection, and then forget
-               // about it
-           new ServerThread( this, s );
-           */
+                new ServerThread( this, s );
            }
-           else {System.out.println("auth failed");}
-       }
-     }
+           else {
+               // credential check failed
+               try  {
+                   dout.writeUTF("Login failed. Wrong username or password.");
+               } catch( IOException ie ) {ie.printStackTrace();}
+               s.close();
+               // update blockedIPs
+               if (IPblockTimes == null)
+                    IPblockTimes = new HashMap<InetAddress, Long>();
+               IPblockTimes.put(currentIP, currentTimestamp);
+               blockedIPs.put(username, IPblockTimes);
+           }    // credential check
+       }    // not duplicate login
+     }  // while
 }
 
 static String sha1(String input) throws NoSuchAlgorithmException {
@@ -120,8 +152,7 @@ static String sha1(String input) throws NoSuchAlgorithmException {
 private boolean authenticated(Socket s, String username)  { 
     String password = null;
     boolean pwMatch = false;
-    InetAddress ip = s.getInetAddress();
-    System.out.println(ip);
+    
     try { 
         DataOutputStream dout = new DataOutputStream( s.getOutputStream() );
         DataInputStream din = new DataInputStream( s.getInputStream() );
@@ -150,12 +181,10 @@ private boolean authenticated(Socket s, String username)  {
             else {password = null;}
         }
     } catch( IOException ie ) { System.out.println( ie ); }
-    if (!(pwMatch)) {
-        // TODO add to list of blocked IPs
-    }
     return pwMatch;
 }
 
+/*
 // Get an enumeration of all the OutputStreams, one for each client
 // connected to us
 Enumeration getOutputStreams() {
@@ -179,7 +208,7 @@ void sendToAll( String message ) {
     } //for
   } //synchronized
 }
-
+*/
 
  // Remove a socket, and it's corresponding output stream, from our
  // list.  This is usually called by a connection thread that has

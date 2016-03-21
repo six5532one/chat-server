@@ -81,7 +81,7 @@
                     server.last(dout, n);
                     break;
                 case BROADCAST:
-                    server.send(dout, "facebook", "foo");
+                    server.broadcast(dout, socket, "foofoofoo");
                      break;
                 case SENDMULTI:
                      server.send(dout, "facebook", "foo");

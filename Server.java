@@ -101,6 +101,16 @@ public void last(DataOutputStream dout, Long n) {
     } catch( IOException ie ) {ie.printStackTrace();}
 }
 
+public void broadcast(DataOutputStream senderOut, Socket s, String msg)  {
+    String senderUsername = connectedUsers.get(s);
+    for (String username: outputStreams.keySet())   {
+        if (username.equals(senderUsername))
+            continue;
+        else
+            send(senderOut, username, msg);
+    }
+}
+
 public synchronized void send(DataOutputStream senderOut, String recipient, String msg)  {
     DataOutputStream recipientOut = outputStreams.get(recipient);
     try {

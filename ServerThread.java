@@ -92,7 +92,12 @@
                     server.broadcast(dout, socket, msg.toString());
                      break;
                 case SENDMULTI:
-                     server.send(dout, "facebook", "foo");
+                    Matcher matcher = Pattern.compile("\\([^\\)]++\\)").matcher(message); 
+                    System.out.println(matcher.find());
+                    int start = matcher.start();
+                    int end = matcher.end();
+                    String[] recipients = message.substring(start+1, end-1).trim().split(" ");  
+                    server.sendMulti(dout, recipients, "foo");
                      break;
                 case SEND:
                      tokens = message.split(" ");

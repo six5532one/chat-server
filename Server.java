@@ -111,6 +111,11 @@ public void broadcast(DataOutputStream senderOut, Socket s, String msg)  {
     }
 }
 
+public void sendMulti(DataOutputStream senderOut, String[] recipientUsernames, String msg)  {
+    for (int i=0; i<recipientUsernames.length; i++)
+        send(senderOut, recipientUsernames[i], msg);
+}
+
 public synchronized void send(DataOutputStream senderOut, String recipient, String msg)  {
     DataOutputStream recipientOut = outputStreams.get(recipient);
     try {

@@ -116,7 +116,7 @@
                      server.send(dout, recipient, msg.toString());
                      break;
                 case LOGOUT:
-                     server.removeConnection( socket );
+                     server.logout(dout, socket);
                      break;
             }   // switch
             server.updateActivityTime(socket, currentTimestamp);
@@ -132,7 +132,7 @@
      } finally {
        // The connection is closed for one reason or another,
        // so have the server dealing with it
-       server.removeConnection( socket );
+         server.removeConnection( socket );
     } //finally
   } //run
 } //ServerThread

@@ -125,6 +125,13 @@ public synchronized void send(DataOutputStream senderOut, String recipient, Stri
     } catch( IOException ie2 ) {ie2.printStackTrace();}
 }
 
+public void logout(DataOutputStream dout, Socket s)    {
+    try {
+        dout.writeUTF("Logging out...");
+    } catch( IOException ie ) {ie.printStackTrace();}
+    removeConnection(s);
+}
+
 private void listen( int port ) throws IOException {
      // Create the ServerSocket
      ss = new ServerSocket( port );
@@ -259,6 +266,9 @@ synchronized void removeConnection( Socket s ) {
     outputStreams.remove(username);
     lastActive.remove(s);
     lastLogoutTime.put(username, currentTimestamp);
+    try {
+        s.close();
+    } catch( IOException ie ) { ie.printStackTrace();}
 }
 
 // Main routine

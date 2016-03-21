@@ -56,10 +56,14 @@ public class Server {
         Long currentTimestamp = new Long(System.currentTimeMillis() / 1000L);
         for (Socket client: lastActive.keySet())  {
             // this connection has been inactive for longer than the TIME_OUT period
-            if (moreThanNSecondsAgo(currentTimestamp, lastActive.get(client), TIME_OUT))    {
-                String username = connectedUsers.get(client);
-                DataOutputStream doutOfInactiveClient = outputStreams.get(username);
-                logout(doutOfInactiveClient, client);
+            try {
+                if (moreThanNSecondsAgo(currentTimestamp, lastActive.get(client), TIME_OUT))    {
+                    String username = connectedUsers.get(client);
+                    DataOutputStream doutOfInactiveClient = outputStreams.get(username);
+                    logout(doutOfInactiveClient, client);
+                }
+            } catch (NullPointerException np)   {
+                System.out.println("NullPointerException during garbage collection");
             }
         }
     }

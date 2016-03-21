@@ -53,6 +53,7 @@
             DataInputStream din = new DataInputStream( socket.getInputStream() );
             DataOutputStream dout = new DataOutputStream( socket.getOutputStream() );
             while (true) {
+                dout.writeUTF("Command: ");
                 // read client message
                 String message = din.readUTF().trim(); 
                 // parse message for command

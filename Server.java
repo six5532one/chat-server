@@ -112,8 +112,9 @@ public class Server {
         }
         for (String loggedoutUsername: lastLogoutTime.keySet())   {
             Long logoutTime = lastLogoutTime.get(loggedoutUsername);
-            if (connectedUsers.get(loggedoutUsername) == null && !(moreThanNSecondsAgo(currentTimestamp, logoutTime, n)))
+            if (outputStreams.get(loggedoutUsername) == null && !(moreThanNSecondsAgo(currentTimestamp, logoutTime, n)))   {
                 result.append(loggedoutUsername).append(" ");
+            }
         }
         try {
             dout.writeUTF(result.toString());

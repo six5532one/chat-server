@@ -126,20 +126,29 @@ public class Server {
             if (username.equals(senderUsername))
                 continue;
             else
-                send(senderOut, username, msg);
+                send(s, senderOut, username, msg);
         }
     }
 
-    public void sendMulti(DataOutputStream senderOut, String[] recipientUsernames, String msg)  {
+    public void sendMulti(Socket senderSocket, DataOutputStream senderOut, String[] recipientUsernames, String msg)  {
         for (int i=0; i<recipientUsernames.length; i++)
-            send(senderOut, recipientUsernames[i], msg);
+            send(senderSocket, senderOut, recipientUsernames[i], msg);
+    }
+
+    private String getUsername(Socket s)    {
+        return connectedUsers.get(s);
     }
 
     // synchronize this method to prevent a potentially concurrent removal of this connection
-    public synchronized void send(DataOutputStream senderOut, String recipient, String msg)  {
+    public synchronized void send(Socket senderSocket, DataOutputStream senderOut, String recipient, String msg)  {
         DataOutputStream recipientOut = outputStreams.get(recipient);
+        // get sender's username
+        String senderName = getUsername(senderSocket);
         try {
-            recipientOut.writeUTF(msg);
+            if (senderName != null)
+                recipientOut.writeUTF(senderName + " says: " + msg);
+            else
+                recipientOut.writeUTF(msg);
         } catch (NullPointerException npe) {
             try {
                 senderOut.writeUTF(recipient + " is not connected");

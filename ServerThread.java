@@ -102,7 +102,7 @@
                                     msg.append(tokens[i]).append(" ");
                                 }
                                 msg.append(tokens[tokens.length-1]);
-                                server.sendMulti(dout, recipients, msg.toString());
+                                server.sendMulti(socket, dout, recipients, msg.toString());
                             }
                             server.updateActivityTime(socket, currentTimestamp);
                             break;
@@ -114,7 +114,7 @@
                                 msg.append(tokens[i]).append(" ");
                             }
                             msg.append(tokens[tokens.length-1]);
-                            server.send(dout, recipient, msg.toString());
+                            server.send(socket, dout, recipient, msg.toString());
                             server.updateActivityTime(socket, currentTimestamp);
                             break;
                         case LOGOUT:

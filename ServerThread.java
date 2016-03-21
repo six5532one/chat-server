@@ -76,10 +76,12 @@
             switch (clientCommand)  {
                 case WHO:
                     server.who(dout);
+                    server.updateActivityTime(socket, currentTimestamp);
                     break;
                 case LAST:
                     Long n = (new Long(60)) * Long.parseLong(message.split(" ")[1]);
                     server.last(dout, n);
+                    server.updateActivityTime(socket, currentTimestamp);
                     break;
                 case BROADCAST:
                     tokens = message.split(" ");
@@ -89,6 +91,7 @@
                      }
                      msg.append(tokens[tokens.length-1]);
                     server.broadcast(dout, socket, msg.toString());
+                    server.updateActivityTime(socket, currentTimestamp);
                      break;
                 case SENDMULTI:
                     Matcher matcher = Pattern.compile("\\([^\\)]++\\)").matcher(message); 
@@ -104,6 +107,7 @@
                         msg.append(tokens[tokens.length-1]);
                         server.sendMulti(dout, recipients, msg.toString());
                     }
+                    server.updateActivityTime(socket, currentTimestamp);
                      break;
                 case SEND:
                      tokens = message.split(" ");
@@ -114,25 +118,19 @@
                      }
                      msg.append(tokens[tokens.length-1]);
                      server.send(dout, recipient, msg.toString());
+                    server.updateActivityTime(socket, currentTimestamp);
                      break;
                 case LOGOUT:
                      server.logout(dout, socket);
                      break;
             }   // switch
-            server.updateActivityTime(socket, currentTimestamp);
         }   //valid command
        }    //while
      } catch( EOFException ie ) {
-       System.out.println("EOFException");
-       // This doesn't need an error message
+       System.out.println("EOFException occurred in ServerThread");
+        server.removeConnection( socket );
      } catch( IOException ie ) {
-       // This does; tell the world!
-         System.out.println("IOException");
-       ie.printStackTrace();
-     } finally {
-       // The connection is closed for one reason or another,
-       // so have the server dealing with it
-         server.removeConnection( socket );
-    } //finally
-  } //run
+         System.out.println("IOException occurred in ServerThread");
+     }
+   } //run
 } //ServerThread

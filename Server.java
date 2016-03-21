@@ -268,7 +268,9 @@ synchronized void removeConnection( Socket s ) {
     lastLogoutTime.put(username, currentTimestamp);
     try {
         s.close();
-    } catch( IOException ie ) { ie.printStackTrace();}
+    } catch( IOException ie ) { 
+        System.out.println("removeConnection IOException");
+        ie.printStackTrace();}
 }
 
 // Main routine

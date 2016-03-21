@@ -87,8 +87,14 @@
                      server.send(dout, "facebook", "foo");
                      break;
                 case SEND:
-                     String recipient = message.split(" ")[1];
-                     server.send(dout, recipient, "foo");
+                     String[] tokens = message.split(" ");
+                     String recipient = tokens[1];
+                     StringBuilder msg = new StringBuilder();
+                     for (int i=2; i<tokens.length-1; i++) {
+                        msg.append(tokens[i]).append(" ");
+                     }
+                     msg.append(tokens[tokens.length-1]);
+                     server.send(dout, recipient, msg.toString());
                      break;
                 case LOGOUT:
                      server.removeConnection( socket );

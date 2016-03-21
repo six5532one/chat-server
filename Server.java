@@ -101,8 +101,15 @@ public void last(DataOutputStream dout, Long n) {
     } catch( IOException ie ) {ie.printStackTrace();}
 }
 
-public synchronized boolean send(String recipient, String msg)  {
-    return true;
+public synchronized void send(DataOutputStream senderOut, String recipient, String msg)  {
+    DataOutputStream recipientOut = outputStreams.get(recipient);
+    try {
+        recipientOut.writeUTF(msg);
+    } catch (NullPointerException npe) {
+        try {
+            senderOut.writeUTF(recipient + " is not connected");
+        } catch( IOException ie ) {ie.printStackTrace();}
+    } catch( IOException ie2 ) {ie2.printStackTrace();}
 }
 
 private void listen( int port ) throws IOException {

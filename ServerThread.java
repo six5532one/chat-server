@@ -81,13 +81,14 @@
                     server.last(dout, n);
                     break;
                 case BROADCAST:
-                    server.send("facebook", "foo");
+                    server.send(dout, "facebook", "foo");
                      break;
                 case SENDMULTI:
-                     server.send("facebook", "foo");
+                     server.send(dout, "facebook", "foo");
                      break;
                 case SEND:
-                     server.send("facebook", "foo");
+                     String recipient = message.split(" ")[1];
+                     server.send(dout, recipient, "foo");
                      break;
                 case LOGOUT:
                      server.removeConnection( socket );

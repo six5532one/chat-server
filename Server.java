@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  {
    // The ServerSocket we'll use for accepting new connections
    //private static final String credentialFilePath = "/Users/emchen/Dropbox/columbia/computer_networks/programming/chatserver_cli/user_pass.txt";
-   private final Long BLOCK_TIME;
+   private final Long BLOCK_TIME, TIME_OUT;
    private static final String credentialFilePath = "/home/ec2805/computer_networks/chatserver_cli/user_pass.txt";
    private ServerSocket ss;
    private Map<String, String> credentials;
@@ -28,6 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
        try  {
            BLOCK_TIME = Long.parseLong(System.getenv().get("BLOCK_TIME"));
        } catch (NumberFormatException e) {throw new RuntimeException("BLOCK_TIME environment variable is not set");}
+       try  {
+           TIME_OUT = Long.parseLong(System.getenv().get("TIME_OUT"));
+       } catch (NumberFormatException e) {throw new RuntimeException("TIME_OUT environment variable is not set");}
 
      File credentialsFile = new File(credentialFilePath);
      credentials = new HashMap<String, String>();
@@ -51,6 +54,17 @@ import java.util.concurrent.ConcurrentHashMap;
      new Thread(gc).start();
      listen( port );
    }
+
+public void collectGarbage()    {
+    Long currentTimestamp = new Long(System.currentTimeMillis() / 1000L);
+    for (Socket client: lastActive.keySet())  {
+        if (moreThanNSecondsAgo(currentTimestamp, lastActive.get(client), TIME_OUT))    {
+            String username = connectedUsers.get(client);
+            DataOutputStream doutOfInactiveClient = outputStreams.get(username);
+            logout(doutOfInactiveClient, client);
+        }
+    }
+}
 
 public void updateActivityTime(Socket socket, Long currentTimestamp) {
     lastActive.put(socket, currentTimestamp);

@@ -7,7 +7,7 @@ public class GarbageCollector implements Runnable   {
 
     public void run() {
         while (true)    {
-            System.out.println("garbage collecting");
+            server.collectGarbage();
         }
     }
 }

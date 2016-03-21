@@ -41,7 +41,7 @@ $ make clean
 ```
 
 Sample session:
-![Alt text](/sample_sesson.png)
+![Alt text](/sample_session.png)
 
 
 Additional Functionality (beyond specs)

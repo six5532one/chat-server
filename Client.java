@@ -58,6 +58,8 @@
          // Print messages from the server in red
          System.out.println(ANSI_RED + message + ANSI_RESET);
        }
+     } catch (EOFException eof)   {
+         System.exit(0);
      } catch( IOException ie ) { System.out.println( ie ); }
    }
 }

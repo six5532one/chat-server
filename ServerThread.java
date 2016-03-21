@@ -72,6 +72,8 @@
         if (clientCommand == null)
             dout.writeUTF("Invalid Command: " + message);
         else    {
+            StringBuilder msg = null;
+            String[] tokens = null;
             switch (clientCommand)  {
                 case WHO:
                     server.who(dout);
@@ -81,15 +83,21 @@
                     server.last(dout, n);
                     break;
                 case BROADCAST:
-                    server.broadcast(dout, socket, "foofoofoo");
+                    tokens = message.split(" ");
+                     msg = new StringBuilder();
+                     for (int i=1; i<tokens.length-1; i++) {
+                        msg.append(tokens[i]).append(" ");
+                     }
+                     msg.append(tokens[tokens.length-1]);
+                    server.broadcast(dout, socket, msg.toString());
                      break;
                 case SENDMULTI:
                      server.send(dout, "facebook", "foo");
                      break;
                 case SEND:
-                     String[] tokens = message.split(" ");
+                     tokens = message.split(" ");
                      String recipient = tokens[1];
-                     StringBuilder msg = new StringBuilder();
+                     msg = new StringBuilder();
                      for (int i=2; i<tokens.length-1; i++) {
                         msg.append(tokens[i]).append(" ");
                      }

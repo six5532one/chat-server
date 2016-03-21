@@ -47,7 +47,8 @@ import java.util.concurrent.ConcurrentHashMap;
      outputStreams = new ConcurrentHashMap<String, DataOutputStream>();
      lastActive = new ConcurrentHashMap<Socket, Long>();
      lastLogoutTime = new ConcurrentHashMap<String, Long>();
-     // All we have to do is listen
+     GarbageCollector gc = new GarbageCollector(this);
+     new Thread(gc).start();
      listen( port );
    }
 

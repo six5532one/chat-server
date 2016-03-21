@@ -40,6 +40,10 @@ To remove bytecode files:
 $ make clean
 ```
 
+Sample session:
+
+
+
 Additional Functionality (beyond specs)
 ----------------------------------------
 

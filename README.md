@@ -40,6 +40,10 @@ To remove bytecode files:
 $ make clean
 ```
 
+Sample session:
+![Alt text](/sample_sesson.png)
+
+
 Additional Functionality (beyond specs)
 ----------------------------------------
 

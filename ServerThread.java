@@ -77,7 +77,8 @@
                     server.who(dout);
                     break;
                 case LAST:
-                    server.last(dout);
+                    Long n = (new Long(60)) * Long.parseLong(message.split(" ")[1]);
+                    server.last(dout, n);
                     break;
                 case BROADCAST:
                     server.send("facebook", "foo");

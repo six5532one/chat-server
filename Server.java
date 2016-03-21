@@ -50,9 +50,15 @@ import java.util.concurrent.ConcurrentHashMap;
      // All we have to do is listen
      listen( port );
    }
-   
+
+/*   
 private boolean exceededBlockTime(Long currentTimestamp, Long blockTimestamp) {
     return (currentTimestamp - blockTimestamp > BLOCK_TIME);
+}
+*/
+
+private boolean moreThanNSecondsAgo(Long currentTimestamp, Long eventTimestamp, Long n) {
+    return (currentTimestamp - eventTimestamp > n);
 }
 
 // make this method synchronized because it checks if a user is connected
@@ -79,10 +85,20 @@ public void who(DataOutputStream dout)  {
     } catch( IOException ie ) {ie.printStackTrace();}
 }
 
-public void last(DataOutputStream dout) {
-    ArrayList<String> results = new ArrayList<String>();
-    results.add("FooLAST");
-    results.add("barLAST");
+public void last(DataOutputStream dout, Long n) {
+    Long currentTimestamp = new Long(System.currentTimeMillis() / 1000L);
+    StringBuilder result = new StringBuilder();
+    for (String username: connectedUsers.values())  {
+        result.append(username).append(" ");
+    }
+    for (String loggedoutUsername: lastLogoutTime.keySet())   {
+        Long logoutTime = lastLogoutTime.get(loggedoutUsername);
+        if (connectedUsers.get(loggedoutUsername) == null && !(moreThanNSecondsAgo(currentTimestamp, logoutTime, n)))
+            result.append(loggedoutUsername).append(" ");
+    }
+    try {
+        dout.writeUTF(result.toString());
+    } catch( IOException ie ) {ie.printStackTrace();}
 }
 
 public synchronized boolean send(String recipient, String msg)  {
@@ -136,7 +152,7 @@ private void listen( int port ) throws IOException {
            Long blockTimestamp = null;
 
             if (IPblockTimes != null && (blockTimestamp = IPblockTimes.get(currentIP)) != null) {
-                if (exceededBlockTime(currentTimestamp, blockTimestamp))    {
+                if (moreThanNSecondsAgo(currentTimestamp, blockTimestamp, BLOCK_TIME))    {
                     IPblockTimes.remove(currentIP);
                     blockedIPs.put(username, IPblockTimes);
                     System.out.println(blockedIPs.get(username).get(currentIP));

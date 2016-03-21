@@ -51,11 +51,9 @@ import java.util.concurrent.ConcurrentHashMap;
      listen( port );
    }
 
-/*   
-private boolean exceededBlockTime(Long currentTimestamp, Long blockTimestamp) {
-    return (currentTimestamp - blockTimestamp > BLOCK_TIME);
+public void updateActivityTime(Socket socket, Long currentTimestamp) {
+    lastActive.put(socket, currentTimestamp);
 }
-*/
 
 private boolean moreThanNSecondsAgo(Long currentTimestamp, Long eventTimestamp, Long n) {
     return (currentTimestamp - eventTimestamp > n);
@@ -252,53 +250,10 @@ private boolean authenticated(Socket s, String username)  {
     return pwMatch;
 }
 
-/*
-// Get an enumeration of all the OutputStreams, one for each client
-// connected to us
-Enumeration getOutputStreams() {
-     return outputStreams.elements();
-}
-
-// Send a message to all clients (utility routine)
-void sendToAll( String message ) {
-   // We synchronize on this because another thread might be
-   // calling removeConnection() and this would screw us up
-   // as we tried to walk through the list
-   synchronized( outputStreams ) {
-     // For each client ...
-     for (Enumeration e = getOutputStreams(); e.hasMoreElements(); ) {
-       // ... get the output stream ...
-       DataOutputStream dout = (DataOutputStream)e.nextElement();
-       // ... and send the message
-       try {
-         dout.writeUTF( message );
-       } catch( IOException ie ) { System.out.println( ie ); }
-    } //for
-  } //synchronized
-}
-*/
-
-void sendToAll( String message ) {System.out.println("send to all");}
-
  // Remove a socket, and it's corresponding output stream, from our
  // list.  This is usually called by a connection thread that has
  // discovered that the connectin to the client is dead.
 synchronized void removeConnection( Socket s ) {
-     /*
-   synchronized( outputStreams ) {
-     // Tell the world
-     System.out.println( "Removing connection to "+s );
-     // Remove it from our hashtable/list
-     outputStreams.remove( s );
-     // Make sure it's closed
-     try {
-       s.close();
-     } catch( IOException ie ) {
-       System.out.println( "Error closing "+s );
-       ie.printStackTrace();
-     }
-  } //synchronized
-  */
      Long currentTimestamp = new Long(System.currentTimeMillis() / 1000L);
      String username = connectedUsers.remove(s);
     outputStreams.remove(username);

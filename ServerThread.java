@@ -55,11 +55,9 @@
        DataOutputStream dout = new DataOutputStream( socket.getOutputStream() );
        // Over and over, forever ...
        while (true) {
-         // ... read the next message ...
-         String message = din.readUTF().trim();
-         // ... tell the world ...
+         // read client message
+         String message = din.readUTF().trim(); 
          // parse message for command
-         // ...
          System.out.println(message);
          Command clientCommand = null;
         for (Command c : Command.values())    {
@@ -72,6 +70,7 @@
         if (clientCommand == null)
             dout.writeUTF("Invalid Command: " + message);
         else    {
+            Long currentTimestamp = new Long(System.currentTimeMillis() / 1000L);
             StringBuilder msg = null;
             String[] tokens = null;
             switch (clientCommand)  {
@@ -119,9 +118,9 @@
                 case LOGOUT:
                      server.removeConnection( socket );
                      break;
-            }
-        }
-         //server.sendToAll( message );
+            }   // switch
+            server.updateActivityTime(socket, currentTimestamp);
+        }   //valid command
        }    //while
      } catch( EOFException ie ) {
        System.out.println("EOFException");

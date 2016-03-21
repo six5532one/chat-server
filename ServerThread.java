@@ -93,11 +93,18 @@
                      break;
                 case SENDMULTI:
                     Matcher matcher = Pattern.compile("\\([^\\)]++\\)").matcher(message); 
-                    System.out.println(matcher.find());
-                    int start = matcher.start();
-                    int end = matcher.end();
-                    String[] recipients = message.substring(start+1, end-1).trim().split(" ");  
-                    server.sendMulti(dout, recipients, "foo");
+                    if (matcher.find()) {
+                        int start = matcher.start();
+                        int end = matcher.end();
+                        String[] recipients = message.substring(start+1, end-1).trim().split(" ");  
+                        tokens = message.substring(end).trim().split(" ");
+                        msg = new StringBuilder();
+                        for (int i=0; i<tokens.length-1; i++) {
+                            msg.append(tokens[i]).append(" ");
+                        }
+                        msg.append(tokens[tokens.length-1]);
+                        server.sendMulti(dout, recipients, msg.toString());
+                    }
                      break;
                 case SEND:
                      tokens = message.split(" ");

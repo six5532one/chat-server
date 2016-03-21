@@ -9,6 +9,11 @@
    private static final Pattern PATTERN_WHO = Pattern.compile("^who$");
    private static final Pattern PATTERN_LAST = Pattern.compile("last \\d++");
    private static final Pattern PATTERN_BROADCAST = Pattern.compile("broadcast [^(\r\n)|(\n)]++");
+    private static final Pattern PATTERN_SENDMULTI = Pattern.compile("send \\([\\S++ &&[^\\)]]++\\) [^(\r\n)|(\n)]++");
+    private static final Pattern PATTERN_SEND = Pattern.compile("send \\S++ [^(\r\n)|(\n)]++");
+    private static final Pattern PATTERN_LOGOUT = Pattern.compile("^logout$");
+
+
 
    // The Server that spawned us
    private Server server;
@@ -17,7 +22,10 @@
    public enum Command  {
        WHO(PATTERN_WHO),
        LAST(PATTERN_LAST),
-       BROADCAST(PATTERN_BROADCAST);
+       BROADCAST(PATTERN_BROADCAST),
+       SENDMULTI(PATTERN_SENDMULTI),
+       SEND(PATTERN_SEND),
+       LOGOUT(PATTERN_LOGOUT);
 
        private final Pattern pattern;
        Command(Pattern p)   {
@@ -44,6 +52,7 @@
        // Create a DataInputStream for communication; the client
        // is using a DataOutputStream to write to us
        DataInputStream din = new DataInputStream( socket.getInputStream() );
+       DataOutputStream dout = new DataOutputStream( socket.getOutputStream() );
        // Over and over, forever ...
        while (true) {
          // ... read the next message ...
@@ -52,13 +61,40 @@
          // parse message for command
          // ...
          System.out.println(message);
+         Command clientCommand = null;
         for (Command c : Command.values())    {
-            if (c.getPattern().matcher(message).find())
+            if (c.getPattern().matcher(message).find()) {
+                clientCommand = c;
                 System.out.println(c);
+                break;
+            }
         }
-        
+        if (clientCommand == null)
+            dout.writeUTF("Invalid Command: " + message);
+        else    {
+            switch (clientCommand)  {
+                case WHO:
+                    server.who(dout);
+                    break;
+                case LAST:
+                    server.last(dout);
+                    break;
+                case BROADCAST:
+                    server.send("facebook", "foo");
+                     break;
+                case SENDMULTI:
+                     server.send("facebook", "foo");
+                     break;
+                case SEND:
+                     server.send("facebook", "foo");
+                     break;
+                case LOGOUT:
+                     server.removeConnection( socket );
+                     break;
+            }
+        }
          //server.sendToAll( message );
-       }
+       }    //while
      } catch( EOFException ie ) {
        System.out.println("EOFException");
        // This doesn't need an error message

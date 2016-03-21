@@ -69,6 +69,26 @@ private synchronized void addConnection(Socket s, String username, Long timestam
     } catch( IOException ie ) {ie.printStackTrace();}
 }
 
+public void who(DataOutputStream dout)  {
+    StringBuilder result = new StringBuilder();
+    for (String username: connectedUsers.values())  {
+        result.append(username).append(" ");
+    }
+    try {
+        dout.writeUTF(result.toString());
+    } catch( IOException ie ) {ie.printStackTrace();}
+}
+
+public void last(DataOutputStream dout) {
+    ArrayList<String> results = new ArrayList<String>();
+    results.add("FooLAST");
+    results.add("barLAST");
+}
+
+public synchronized boolean send(String recipient, String msg)  {
+    return true;
+}
+
 private void listen( int port ) throws IOException {
      // Create the ServerSocket
      ss = new ServerSocket( port );

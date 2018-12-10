@@ -1,7 +1,7 @@
 Chat Server
 ===========
 
-Description of Code
+Code
 --------------------
 This source code implements a CLI chat server with the specifications listed in `specifications.pdf`. Features include authentication, blocking IPs for suspicious login activity, broadcasting messages to all other users, specifying one or more users to send a message to, viewing the list of users who were connected to the server within the last n minutes, and automatically logging out inactive clients.
 
